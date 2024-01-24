@@ -43,7 +43,13 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*;
 
 #COPY ./docker/php/laravel.ini /usr/local/etc/php/conf.d/laravel.ini
+# Install composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+COPY . /var/www
 
 WORKDIR /usr/src/app
+
+RUN composer install
 
 RUN chown -R www-data:www-data .
