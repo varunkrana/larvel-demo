@@ -3,6 +3,8 @@ FROM php:8.0-fpm
 # Install dockerize so we can wait for containers to be ready
 ENV DOCKERIZE_VERSION 0.6.1
 
+WORKDIR /usr/src/app
+
 RUN curl -s -f -L -o /tmp/dockerize.tar.gz https://github.com/jwilder/dockerize/releases/download/v$DOCKERIZE_VERSION/dockerize-linux-amd64-v$DOCKERIZE_VERSION.tar.gz \
     && tar -C /usr/local/bin -xzvf /tmp/dockerize.tar.gz \
     && rm /tmp/dockerize.tar.gz
@@ -10,11 +12,10 @@ RUN curl -s -f -L -o /tmp/dockerize.tar.gz https://github.com/jwilder/dockerize/
 # Install Composer
 ENV COMPOSER_VERSION 2.1.5
 
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer --version=$COMPOSER_VERSION
+#RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer --version=$COMPOSER_VERSION
 
 # Install nodejs
-RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - \
-    && apt-get update \
+RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         libz-dev \
         libpq-dev \
@@ -24,7 +25,6 @@ RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - \
         libzip-dev \
         unzip \
         zip \
-        nodejs \
     && apt-get clean \
     && pecl install redis \
     && docker-php-ext-configure gd \
@@ -42,10 +42,8 @@ RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - \
     && rm -rf /var/lib/apt/lists/*;
 
 #COPY ./docker/php/laravel.ini /usr/local/etc/php/conf.d/laravel.ini
-COPY . /var/www
+COPY . .
 
-RUN chown -R www-data:www-data /var/www
-
-WORKDIR /var/www
+RUN chown -R www-data:www-data /usr/src/app/storage
 
 RUN composer install
